@@ -1,0 +1,8 @@
+name: Autodispensor
+version: ${project.version}
+main: me.shafi.autodispensor.Autodispensor
+api-version: 1.16
+commands:
+  ad:
+    description: do /ad help for help
+
