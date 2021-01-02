@@ -130,7 +130,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                     player.openInventory(inv);
                 }
 
-                if (args[0].equals("set")) {
+                else if (args[0].equals("set")) {
 
 
                     if (!(block.getType() == Material.AIR)) {
@@ -188,18 +188,33 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad stop : to stop dispensing" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad help : to get help" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad settime (time in ticks): to set delay time of launch");
+                    player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad remove : to remove the block");
 
-                }else {
+                }
+                else if (args[0].equals("remove")){
+                    try {
+                        Dispenser d = (Dispenser) block.getState();
+                        if(dispensers.get(check2).contains(d)){
+                            dispensers.get(check2).remove(d);
+                        }
+                    }
+                    catch (ClassCastException e){
+
+                    }
+
+                }
+                else {
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad setinv : to set dispenser inventory" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad set : set dispenser where you looking at" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad go : to dispense " );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad stop : to stop dispensing" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad help : to get help" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad settime (time in ticks): to set delay time of launch");
+                    player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad remove : to remove the block");
                 }
             }
-                else if (args.length == 2){
-                    if (args[0].equals("settime")){
+                else if (args.length == 2) {
+                    if (args[0].equals("settime")) {
                         delaytime = Integer.valueOf(args[1]);
                         player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "time set to: " + delaytime);
                     }
@@ -211,6 +226,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad stop : to stop dispensing" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad help : to get help" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad settime (time in ticks): to set delay time of launch");
+                    player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad remove : to remove the block");
                 }
         }
         }
