@@ -100,11 +100,15 @@ public final class Autodispensor extends JavaPlugin implements Listener {
         data.getConfig().getConfigurationSection("dispenserdata").getKeys(false).forEach(key ->{
 
           ArrayList<Location> content = ((ArrayList<Location>) data.getConfig().get("dispenserdata." + key));
+            for (int i = 0; i< content.size();i++) {
+                ArrayList<Block> contents = new ArrayList<Block>();
+                contents.add(content.get(i).getBlock());
+                dispensers.put(check2 , contents);
+            }
 
 
-                for (int i = 0; i< content.size();i++){
-                    dispensers.put(key , (ArrayList<Block>) content.get(i).getBlock());
-                }
+
+
         });
     }
 
