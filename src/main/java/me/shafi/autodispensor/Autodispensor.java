@@ -3,6 +3,7 @@ package me.shafi.autodispensor;
 import me.shafi.autodispensor.data.Datamanager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -26,7 +27,7 @@ import java.util.*;
 public final class Autodispensor extends JavaPlugin implements Listener {
     public Map<String , ItemStack[]> dispenserinv = new HashMap<String, ItemStack[]>();
     public Map<String , ArrayList<Block>> dispensers = new HashMap<String, ArrayList<Block>>();
-    public Map<String , Block[]> dispenserstoarray = new HashMap<String, Block[]>();
+    public Map<String , Location[]> dispenserstoarray = new HashMap<String, Location[]>();
 
     private ArrayList<Integer> taskids = new ArrayList<Integer>();
     private int taskid ;
@@ -81,9 +82,15 @@ public final class Autodispensor extends JavaPlugin implements Listener {
         });
     }
     public void saveDispenser(){
-        dispenserstoarray.put(check2 , dispensers.get(check2).toArray(new Block[1]));
+         ArrayList<Location> dispenserloc = new ArrayList<>();
+         for (int i = 0; i < dispensers.get(check2).size(); i++){
+             dispenserloc.add(dispensers.get(check2).get(i).getLocation());
+         }
 
-        for (Map.Entry<String , Block[]> entry : dispenserstoarray.entrySet()){
+
+        dispenserstoarray.put(check2 , dispenserloc.toArray(new Location[1]));
+
+        for (Map.Entry<String , Location[]> entry : dispenserstoarray.entrySet()){
             data.getConfig().set("dispenserdata." + entry.getKey() , entry.getValue());
         }
         data.saveConfig();
@@ -92,11 +99,12 @@ public final class Autodispensor extends JavaPlugin implements Listener {
     public void restoreDispenser(){
         data.getConfig().getConfigurationSection("dispenserdata").getKeys(false).forEach(key ->{
 
-          //  ArrayList<Dispenser> content = ((ArrayList<Dispenser>) data.getConfig().get("dispenserdata." + key));
+          ArrayList<Location> content = ((ArrayList<Location>) data.getConfig().get("dispenserdata." + key));
 
 
-                dispensers.put(key , (ArrayList<Block>) data.getConfig().get("dispenserdata." + key));
-
+                for (int i = 0; i< content.size();i++){
+                    dispensers.put(key , (ArrayList<Block>) content.get(i).getBlock());
+                }
         });
     }
 
@@ -195,6 +203,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                     try {
                         Dispenser d = (Dispenser) block.getState();
                         if(dispensers.get(check2).contains(d)){
+                            player.sendMessage("it does contain");
                             dispensers.get(check2).remove(d);
                         }
                     }
