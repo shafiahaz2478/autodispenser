@@ -36,13 +36,16 @@ public final class Autodispensor extends JavaPlugin implements Listener {
     public ArrayList<Block> dispensersetter = new ArrayList<Block>();
     String check = "dispenserinv";
     String check2 = "dispensers";
-    Random rd = new Random();
     private int delaytime;
-    public ArrayList<Integer> uuids = new ArrayList<Integer>();
+
 
 
     @Override
     public void onEnable() {
+
+
+
+
         System.out.println("Plugin has started");
         this.data = new Datamanager(this);
         this.getServer().getPluginManager().registerEvents(this , this);
@@ -57,6 +60,20 @@ public final class Autodispensor extends JavaPlugin implements Listener {
             this.restoreDispenser();
         }
 
+    }
+
+    public void onDispenserinvput(){
+
+
+        try{
+
+            for (int i = 0; i < dispensers.get(check2).size(); i++) {
+                InventoryHolder inevntory = (InventoryHolder) dispensers.get(check2).get(i).getState();
+                infarrow(inevntory, dispensers.get(check2).get(i));
+            }
+        }catch (Exception e){
+
+        }
     }
     @Override
     public void onDisable() {
@@ -82,13 +99,13 @@ public final class Autodispensor extends JavaPlugin implements Listener {
         });
     }
     public void saveDispenser(){
-         ArrayList<Location> dispenserloc = new ArrayList<>();
+         ArrayList<Location> dispenserloc = new ArrayList<Location>();
          for (int i = 0; i < dispensers.get(check2).size(); i++){
              dispenserloc.add(dispensers.get(check2).get(i).getLocation());
          }
 
 
-        dispenserstoarray.put(check2 , dispenserloc.toArray(new Location[1]));
+        dispenserstoarray.put(check2 , dispenserloc.toArray(new Location[0]));
 
         for (Map.Entry<String , Location[]> entry : dispenserstoarray.entrySet()){
             data.getConfig().set("dispenserdata." + entry.getKey() , entry.getValue());
@@ -98,15 +115,17 @@ public final class Autodispensor extends JavaPlugin implements Listener {
 
     public void restoreDispenser(){
         data.getConfig().getConfigurationSection("dispenserdata").getKeys(false).forEach(key ->{
+            ArrayList<Block> contents = new ArrayList<Block>();
 
           ArrayList<Location> content = ((ArrayList<Location>) data.getConfig().get("dispenserdata." + key));
             for (int i = 0; i< content.size();i++) {
-                ArrayList<Block> contents = new ArrayList<Block>();
+
                 contents.add(content.get(i).getBlock());
-                dispensers.put(check2 , contents);
+
             }
+            dispensers.put(check2 , contents);
 
-
+            onDispenserinvput();
 
 
         });
@@ -155,7 +174,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                             directional.setFacing(BlockFace.UP);
                             block.setBlockData(blockData);
                             InventoryHolder inevntory = (InventoryHolder) block.getState();
-                            infarrow(inevntory, player, block);
+                            infarrow(inevntory, block);
 
                             dispensersetter.add(block);
                             dispensers.put(check2 , dispensersetter);
@@ -205,10 +224,13 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                 }
                 else if (args[0].equals("remove")){
                     try {
-                        Dispenser d = (Dispenser) block.getState();
-                        if(dispensers.get(check2).contains(d)){
+
+                        player.sendMessage(block.toString());
+
+                        player.sendMessage( ChatColor.GREEN + dispensers.get(check2).toString());
+                        if(dispensers.get(check2).contains(block)){
                             player.sendMessage("it does contain");
-                            dispensers.get(check2).remove(d);
+                            dispensers.get(check2).remove(block);
                         }
                     }
                     catch (ClassCastException e){
@@ -249,7 +271,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
     }
 
 
-    public void infarrow(InventoryHolder dispenser, Player p , Block block) {
+    public void infarrow(InventoryHolder dispenser,  Block block) {
 
 
         taskid = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
