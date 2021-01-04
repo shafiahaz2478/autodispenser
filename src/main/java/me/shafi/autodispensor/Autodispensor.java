@@ -225,11 +225,11 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                 else if (args[0].equals("remove")){
                     try {
 
-                        player.sendMessage(block.toString());
+
 
                         player.sendMessage( ChatColor.GREEN + dispensers.get(check2).toString());
                         if(dispensers.get(check2).contains(block)){
-                            player.sendMessage("it does contain");
+
                             dispensers.get(check2).remove(block);
                         }
                     }
