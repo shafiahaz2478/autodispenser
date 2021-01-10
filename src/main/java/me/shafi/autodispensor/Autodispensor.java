@@ -3,7 +3,6 @@ package me.shafi.autodispensor;
 import me.shafi.autodispensor.data.Datamanager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -27,7 +26,7 @@ import java.util.*;
 public final class Autodispensor extends JavaPlugin implements Listener {
     public Map<String , ItemStack[]> dispenserinv = new HashMap<String, ItemStack[]>();
     public Map<String , ArrayList<Block>> dispensers = new HashMap<String, ArrayList<Block>>();
-    public Map<String , Location[]> dispenserstoarray = new HashMap<String, Location[]>();
+    public Map<String , Block[]> dispenserstoarray = new HashMap<String, Block[]>();
 
     private ArrayList<Integer> taskids = new ArrayList<Integer>();
     private int taskid ;
@@ -36,16 +35,13 @@ public final class Autodispensor extends JavaPlugin implements Listener {
     public ArrayList<Block> dispensersetter = new ArrayList<Block>();
     String check = "dispenserinv";
     String check2 = "dispensers";
+    Random rd = new Random();
     private int delaytime;
-
+    public ArrayList<Integer> uuids = new ArrayList<Integer>();
 
 
     @Override
     public void onEnable() {
-
-
-
-
         System.out.println("Plugin has started");
         this.data = new Datamanager(this);
         this.getServer().getPluginManager().registerEvents(this , this);
@@ -60,20 +56,6 @@ public final class Autodispensor extends JavaPlugin implements Listener {
             this.restoreDispenser();
         }
 
-    }
-
-    public void onDispenserinvput(){
-
-
-        try{
-
-            for (int i = 0; i < dispensers.get(check2).size(); i++) {
-                InventoryHolder inevntory = (InventoryHolder) dispensers.get(check2).get(i).getState();
-                infarrow(inevntory, dispensers.get(check2).get(i));
-            }
-        }catch (Exception e){
-
-        }
     }
     @Override
     public void onDisable() {
@@ -99,15 +81,9 @@ public final class Autodispensor extends JavaPlugin implements Listener {
         });
     }
     public void saveDispenser(){
-         ArrayList<Location> dispenserloc = new ArrayList<Location>();
-         for (int i = 0; i < dispensers.get(check2).size(); i++){
-             dispenserloc.add(dispensers.get(check2).get(i).getLocation());
-         }
+        dispenserstoarray.put(check2 , dispensers.get(check2).toArray(new Block[1]));
 
-
-        dispenserstoarray.put(check2 , dispenserloc.toArray(new Location[0]));
-
-        for (Map.Entry<String , Location[]> entry : dispenserstoarray.entrySet()){
+        for (Map.Entry<String , Block[]> entry : dispenserstoarray.entrySet()){
             data.getConfig().set("dispenserdata." + entry.getKey() , entry.getValue());
         }
         data.saveConfig();
@@ -115,18 +91,11 @@ public final class Autodispensor extends JavaPlugin implements Listener {
 
     public void restoreDispenser(){
         data.getConfig().getConfigurationSection("dispenserdata").getKeys(false).forEach(key ->{
-            ArrayList<Block> contents = new ArrayList<Block>();
 
-          ArrayList<Location> content = ((ArrayList<Location>) data.getConfig().get("dispenserdata." + key));
-            for (int i = 0; i< content.size();i++) {
+          //  ArrayList<Dispenser> content = ((ArrayList<Dispenser>) data.getConfig().get("dispenserdata." + key));
 
-                contents.add(content.get(i).getBlock());
 
-            }
-            dispensers.put(check2 , contents);
-
-            onDispenserinvput();
-
+                dispensers.put(key , (ArrayList<Block>) data.getConfig().get("dispenserdata." + key));
 
         });
     }
@@ -161,7 +130,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                     player.openInventory(inv);
                 }
 
-                else if (args[0].equals("set")) {
+                if (args[0].equals("set")) {
 
 
                     if (!(block.getType() == Material.AIR)) {
@@ -174,7 +143,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                             directional.setFacing(BlockFace.UP);
                             block.setBlockData(blockData);
                             InventoryHolder inevntory = (InventoryHolder) block.getState();
-                            infarrow(inevntory, block);
+                            infarrow(inevntory, player, block);
 
                             dispensersetter.add(block);
                             dispensers.put(check2 , dispensersetter);
@@ -219,37 +188,18 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad stop : to stop dispensing" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad help : to get help" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad settime (time in ticks): to set delay time of launch");
-                    player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad remove : to remove the block");
 
-                }
-                else if (args[0].equals("remove")){
-                    try {
-
-
-
-                        player.sendMessage( ChatColor.GREEN + dispensers.get(check2).toString());
-                        if(dispensers.get(check2).contains(block)){
-
-                            dispensers.get(check2).remove(block);
-                        }
-                    }
-                    catch (ClassCastException e){
-
-                    }
-
-                }
-                else {
+                }else {
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad setinv : to set dispenser inventory" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad set : set dispenser where you looking at" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad go : to dispense " );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad stop : to stop dispensing" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad help : to get help" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad settime (time in ticks): to set delay time of launch");
-                    player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad remove : to remove the block");
                 }
             }
-                else if (args.length == 2) {
-                    if (args[0].equals("settime")) {
+                else if (args.length == 2){
+                    if (args[0].equals("settime")){
                         delaytime = Integer.valueOf(args[1]);
                         player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "time set to: " + delaytime);
                     }
@@ -261,7 +211,6 @@ public final class Autodispensor extends JavaPlugin implements Listener {
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad stop : to stop dispensing" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad help : to get help" );
                     player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad settime (time in ticks): to set delay time of launch");
-                    player.sendMessage(ChatColor.GOLD + "[Auto Dispenser] " + ChatColor.GREEN + "do /ad remove : to remove the block");
                 }
         }
         }
@@ -271,7 +220,7 @@ public final class Autodispensor extends JavaPlugin implements Listener {
     }
 
 
-    public void infarrow(InventoryHolder dispenser,  Block block) {
+    public void infarrow(InventoryHolder dispenser, Player p , Block block) {
 
 
         taskid = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
